@@ -24,10 +24,6 @@
 template <bool with_logs>
 void encrypt_file(Kyznechik &kyz, std::wstring drop_path = L"-1")
 {
-    #ifdef _WIN32
-        _setmode(_fileno(stdin), _O_U16TEXT);
-    #endif
-
     std::wstring path;
     std::filesystem::path correct_path;
 
@@ -117,10 +113,6 @@ void encrypt_file(Kyznechik &kyz, std::wstring drop_path = L"-1")
 template <bool with_logs>
 void encrypt_directory(Kyznechik &kyz, std::wstring drop_path = L"-1")
 {
-    #ifdef _WIN32
-        _setmode(_fileno(stdin), _O_U16TEXT);
-        _setmode(_fileno(stdout), _O_U16TEXT);
-    #endif
     std::filesystem::path correct_path;
 
     if(drop_path == L"-1") {
@@ -218,10 +210,6 @@ void encrypt_directory(Kyznechik &kyz, std::wstring drop_path = L"-1")
 
 template <bool with_logs>
 void decrypt_file(Kyznechik& kyz, std::wstring drop_path = L"-1") {
-    #ifdef _WIN32
-        _setmode(_fileno(stdin), _O_U16TEXT);
-    #endif
-
     std::wstring path;
     std::filesystem::path correct_path;
 
@@ -312,10 +300,6 @@ void decrypt_file(Kyznechik& kyz, std::wstring drop_path = L"-1") {
 template <bool with_logs>
 void decrypt_directory(Kyznechik &kyz, std::wstring drop_path = L"-1")
 {
-    #ifdef _WIN32
-        _setmode(_fileno(stdin), _O_U16TEXT);
-        _setmode(_fileno(stdout), _O_U16TEXT);
-    #endif
     std::filesystem::path correct_path;
 
     if(drop_path == L"-1") {
@@ -446,7 +430,7 @@ void key_finger_print(std::array<std::array<uint8_t, 16ULL>, 10ULL>& ROUND_KEY) 
         L"█"         // 0xE0–0xFF
     };
     
-    size_t ROUND_KEY_SIZE = 160;
+    const size_t ROUND_KEY_SIZE = 160;
     
     uint8_t key_linear[ROUND_KEY_SIZE];
     for (int r_key = 0; r_key < 10; r_key++) {
@@ -491,15 +475,11 @@ void key_finger_print(std::array<std::array<uint8_t, 16ULL>, 10ULL>& ROUND_KEY) 
 }
 
 void create_pbkdf_password(Kyznechik& kyz, bool is_decrypt) {
-            
-    #ifdef _WIN32
-        _setmode(_fileno(stdin), _O_U16TEXT);
-    #endif
-
     std::array<uint8_t, 32> this_hash = {0};
     std::wcout << "Password: ";
     std::wstring wpassword;
     std::getline(std::wcin, wpassword);
+
     std::string password (wpassword.begin(), wpassword.end());
     if (is_decrypt) {
         std::wcout << "Hashing password and salt (PIM => 500.000 iterations)" << std::endl;
@@ -519,16 +499,15 @@ void create_pbkdf_password(Kyznechik& kyz, bool is_decrypt) {
         }
         kyz.init();
         key_finger_print(kyz.ROUND_KEYS);
+        
+        std::wcin.ignore(1, L'\n');
 
         return;
     } else {
         std::random_device rd;
         SHA256 sha;
-        std::vector<uint8_t> d_salt(32);
         std::string d_pass {password.begin(), password.end()};
-        std::string d_salt_hex;
         
-        d_pass.append(d_salt_hex);
         std::wcout << "Hashing password and salt (PIM => 500.000 iterations)" << std::endl;
         for (int h = 0; h < 500000; h++) {
             if (h == 0) {
@@ -547,8 +526,9 @@ void create_pbkdf_password(Kyznechik& kyz, bool is_decrypt) {
         key_finger_print(kyz.ROUND_KEYS);
 
         std::wcout << "Save for decrypt: " << wpassword;
-        std::wcout << std::wstring(d_salt_hex.begin(), d_salt_hex.end());
         std::wcout << std::endl << std::endl;
+
+        std::wcin.ignore(1, L'\n');
     }
 }
 
@@ -639,9 +619,11 @@ int main(int argc, char *argv[])
     }
     else
     {
-        //print_rounded_keys(kyz);
         std::wstring select;
         std::wcout << L"<=== ENCRYPT ===>\n\n1. File\n2. Directory\n\n<=== DECRYPT ===>\n\n3. File\n4. Directory\n\n( 1/2/3/4 ): ";
+
+        std::getline(std::wcin, select);
+        std::wcin.ignore(1, L'\n');
 
         if (select == L"1")
         {
