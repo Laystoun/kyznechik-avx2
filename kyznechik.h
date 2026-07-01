@@ -4496,7 +4496,16 @@ public:
     void expand_keys();
     void encrypt_block(uint8_t* p_inf);
     void decrypt_block(uint8_t* p_inf);
+#define KYZ256_CBC
 
+#ifdef KYZ256_CBC
+    uint8_t cbc_prev_block[16];
+
+    void cbc_generate_iv();
+    void cbc_set_iv(const uint8_t* iv);
+    void cbc_encrypt_block(uint8_t* p_inf);
+    void cbc_decrypt_block(uint8_t* p_inf);
+#endif
     
     ~Kyznechik() {
         volatile uint8_t* p = master_key;

@@ -4,13 +4,10 @@
 #include <cassert>
 #include <array>
 #include <chrono>
-#include "pkcs.h"
-#include "kyznechik.h"
 #include <omp.h>
 #include <clocale>
 #include <filesystem>
 #include <random>
-#include "SHA256.h"
 #include <thread>
 
 #ifdef _WIN32
@@ -20,6 +17,10 @@
 
 #include <cwctype>
 #include <algorithm>
+
+#include "pkcs.h"
+#include "kyznechik.h"
+#include "SHA256.h"
 
 template <bool with_logs>
 void encrypt_file(Kyznechik &kyz, std::wstring drop_path = L"-1")
@@ -539,7 +540,6 @@ void speed_test(Kyznechik& kyz) {
     std::vector<uint8_t> buff(BUFF_SIZE);
 
     for (int x = 0; x < BUFF_SIZE; x++) buff[x] = uint8_t(x ^ 0xC3);
-    kyz.init();
 
     std::wcout << "Start In-Memory benchmark" << std::endl;
 

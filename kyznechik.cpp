@@ -1,9 +1,12 @@
-#include "kyznechik.h"
 #include <iostream>
 #include <algorithm>
 #include <random>
 #include <emmintrin.h>
 #include <immintrin.h>
+#include <sodium.h>
+#include <iostream>
+
+#include "kyznechik.h"
 
 void Kyznechik::S_transformation(uint8_t *p_inf) {
     for (int i = 0; i < 16; i++) p_inf[i] = S[p_inf[i]];
